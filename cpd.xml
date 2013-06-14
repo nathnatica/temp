@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project name="cpd" default="cpd" basedir="C:\jenkins\jobs\wedding\workspace">
+
+	<property name="cpd.lib.dir" value="D:\programs\library" />
+	<property name="cpd.src.dir" value="${basedir}/src/main/java" />
+	<property name="report.home" value="${basedir}/target/report" />
+
+	<path id="cpd.lib">
+		<fileset dir="${cpd.lib.dir}">
+			<include name="pmd-4.2.5.jar" />
+		</fileset>
+	</path>
+
+	<taskdef name="cpd" classname="net.sourceforge.pmd.cpd.CPDTask" classpathref="cpd.lib" />
+
+	<target name="cpd">
+		<mkdir dir="${report.home}/cpd" />
+		<cpd minimumtokencount="100" outputfile="${report.home}/cpd/cpd.xml" format="xml" language="java">
+			<fileset dir="${cpd.src.dir}" >
+    			<include name="**/*.java"/>
+			</fileset>
+		</cpd>
+	</target>
+
+</project>

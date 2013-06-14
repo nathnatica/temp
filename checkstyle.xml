@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project name="checkstyle" default="checkstyle" basedir="C:\jenkins\jobs\wedding\workspace" >
+
+	<property name="checkstyle.lib.dir" value="D:\programs\library" />
+	<property name="checkstyle.src.dir" value="${basedir}/src/main/java" />
+	<property name="report.home" value="${basedir}/target/report" />
+
+	<path id="checkstyle.lib">
+		<fileset dir="${checkstyle.lib.dir}">
+			<include name="checkstyle-5.3-all.jar" />
+		</fileset>
+	</path>
+
+	<taskdef resource="checkstyletask.properties" classpathref="checkstyle.lib" />
+
+	<target name="checkstyle">
+		<mkdir dir="${report.home}/checkstyle" />
+
+		<checkstyle config="${checkstyle.lib.dir}/checkstyle_config/sun_checks.xml" failOnViolation="false" >
+			<formatter type="xml" toFile="${report.home}/checkstyle/checkstyle.xml" />
+			<fileset dir="${checkstyle.src.dir}">
+				<include name="**/*.java" />
+			</fileset>
+		</checkstyle>
+	</target>
+
+</project>

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project name="pmd" default="pmd" basedir="C:\jenkins\jobs\wedding\workspace">
+
+	<property name="pmd.lib.dir" value="D:\programs\library" />
+	<property name="pmd.src.dir" value="${basedir}/src/main/java" />
+	<property name="report.home" value="${basedir}/target/report" />
+
+	<path id="pmd.lib">
+		<fileset dir="${pmd.lib.dir}">
+			<include name="pmd-4.2.5.jar" />
+		</fileset>
+	</path>
+
+	<taskdef name="pmd" classname="net.sourceforge.pmd.ant.PMDTask" classpathref="pmd.lib" />
+
+	<target name="pmd">
+		<mkdir dir="${report.home}/pmd" />
+
+		<pmd shortFilenames="true">
+			<classpath>
+				<pathelement location="D:\programs\library\jaxen-1.1.1.jar"/>
+			</classpath>
+			<ruleset>rulesets/basic.xml</ruleset>
+			<ruleset>rulesets/favorites.xml</ruleset>
+			<ruleset>rulesets/optimizations.xml</ruleset>
+			<ruleset>rulesets/controversial.xml</ruleset>
+			<formatter type="xml" toFile="${report.home}/pmd/pmd.xml"/>
+			<fileset dir="${pmd.src.dir}" >
+    			<include name="**/*.java"/>
+			</fileset>
+		</pmd>
+	</target>
+
+</project>

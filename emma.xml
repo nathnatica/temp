@@ -1,0 +1,87 @@
+<?xml version="1.0"?>
+
+<project default="emma.report" basedir="C:\jenkins\jobs\wedding\workspace">
+
+	<property name="emma.enabled" value="true" />
+	<property name="emma.lib.dir" value="D:\programs\library" />
+	<property name="emma.src.dir" value="${basedir}/src/main/java" />
+	<property name="emma.origin.dir" value="${basedir}/target/classes" />
+	<property name="emma.instr.dir" value="${basedir}/target/instr-classes" />
+	<property name="report.home" value="${basedir}/target/report" />
+	<property name="emma.coverage.dir" value="${basedir}/target/report/emma" />
+	<property name="test.build.home" value="${basedir}/target/test-classes" />
+
+	<path id="emma.lib">
+		<pathelement location="${emma.lib.dir}/emma.jar"/>
+		<pathelement location="${emma.lib.dir}/emma_ant.jar"/>
+	</path>
+
+	<taskdef resource="emma_ant.properties">
+		<classpath refid="emma.lib" />
+	</taskdef>
+
+	<target name="emma.setup">
+		<mkdir dir="${emma.instr.dir}"/>
+		<mkdir dir="${emma.coverage.dir}"/>
+		<mkdir dir="${test.build.home}/junit"/>
+		<mkdir dir="${report.home}/junit"/>
+	</target>
+
+	<target name="emma.instrument" depends="emma.setup">
+    	<emma enabled="${emma.enabled}">
+    		<instr instrpath="${emma.origin.dir}" destdir="${emma.instr.dir}" metadatafile="${emma.coverage.dir}/metadata.emma" merge="true">
+    			<filter value=""/>
+    		</instr>
+		</emma>
+    </target>
+
+
+	<target name="emma.test" depends="emma.instrument">
+		<junit printsummary="yes" maxmemory="512" haltonfailure="false" fork="true">
+			<classpath>
+				<pathelement location="${emma.instr.dir}"/>
+				<pathelement location="${emma.origin.dir}"/>
+				<pathelement location="${test.build.home}"/>
+				<path refid="emma.lib"/>
+				<pathelement location="D:\programs\library\emma.jar"/>
+				<pathelement location="D:\programs\library\emma_ant.jar"/>
+				<pathelement location="D:\programs\library\junit4.8.1\junit.jar"/>
+			</classpath>
+			<!--
+			<classpath refid="project.classpath"/>
+			-->
+			<formatter type="xml" />
+
+			<jvmarg value="-Demma.coverage.out.file=${emma.coverage.dir}/coverage.emma" />
+			<jvmarg value="-Demma.coverage.out.merage=true" />
+
+			<batchtest todir="${report.home}/junit">
+				<fileset dir="${test.build.home}" includes="**/*Test.class">
+				</fileset>
+			</batchtest>
+		</junit>
+
+		<junitreport todir="${report.home}/junit">
+			<fileset dir="${test.build.home}/junit">
+				<include name="TEST*.xml"/>
+			</fileset>
+			<report format="frames" todir="${report.home}/junit"/>
+		</junitreport>
+	</target>
+
+
+	<target name="emma.report" depends="emma.test">
+    	<emma enabled="${emma.enabled}" verbosity="verbose">
+    		<report sourcepath="${emma.src.dir}" sort="+block,+name,+method,+class" metrics="method:70,block:80,line:80,class:100">
+    			<fileset dir="${emma.coverage.dir}" >
+    				<include name ="*.emma" />
+    			</fileset>
+
+    			<xml outfile="${emma.coverage.dir}/coverage.xml" depth="method"/>
+    			<html outfile="${emma.coverage.dir}/coverage.html" depth="method"/>
+    		</report>
+    	</emma>
+	</target>
+
+</project>
+

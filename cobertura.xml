@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project name="cobertura" default="coverage" basedir="C:\jenkins\jobs\wedding\workspace">
+
+	<description>
+    Cobertura - http://cobertura.sourceforge.net/
+    Copyright (C) 2003 jcoverage ltd.
+    Copyright (C) 2005 Mark Doliner &lt;thekingant@users.sourceforge.net&gt;
+    Copyright (C) 2006 Dan Godfrey
+    Cobertura is licensed under the GNU General Public License
+    Cobertura comes with ABSOLUTELY NO WARRANTY
+    </description>
+
+	<property name="cobertura.lib.dir" value="D:\programs\library" />
+	<property name="cobertura.src.dir" value="${basedir}/src/main/java" />
+	<property name="cobertura.origin.dir" value="${basedir}/target/classes" />
+	<property name="cobertura.instr.dir" value="${basedir}/target/instr-classes" />
+	<property name="report.home" value="${basedir}/target/report" />
+	<property name="cobertura.coverage.dir" value="${basedir}/target/report/cobertura" />
+	<property name="test.build.home" value="${basedir}/target/test-classes" />
+
+	<path id="cobertura.lib">
+		<fileset dir="${cobertura.lib.dir}">
+			<include name="cobertura.jar" />
+			<include name="asm-3.0.jar" />
+			<include name="jakarta-oro-2.0.8.jar" />
+			<include name="asm-tree-3.0.jar" />
+			<include name="log4j-1.2.9.jar" />
+		</fileset>
+	</path>
+
+	<!--
+	<path id="cobertura.lib">
+		<pathelement location="${cobertura.lib.dir}/cobertura.jar"/>
+		<pathelement location="${cobertura.lib.dir}/asm-3.0.jar"/>
+		<pathelement location="${cobertura.lib.dir}/asm-tree-3.0.jar"/>
+		<pathelement location="${cobertura.lib.dir}/jakarta-oro-2.0.8.jar"/>
+		<pathelement location="${cobertura.lib.dir}/log4j-1.2.9.jar"/>
+	</path>
+	-->
+
+	<taskdef resource="tasks.properties">
+		<classpath refid="cobertura.lib" />
+	</taskdef>
+
+	<target name="init">
+		<mkdir dir="${cobertura.instr.dir}" />
+		<mkdir dir="${cobertura.coverage.dir}" />
+		<mkdir dir="${test.build.home}/junit"/>
+	</target>
+
+	<target name="instrument" depends="init">
+
+
+		<!--
+			Remove the coverage data file and any old instrumentation.
+		-->
+		<delete file="cobertura.ser"/>
+		<!--
+		<delete dir="${instrumented.dir}" />
+		 -->
+
+		<!--
+			Instrument the application classes, writing the
+			instrumented classes into ${build.instrumented.dir}.
+		-->
+		<cobertura-instrument todir="${cobertura.instr.dir}">
+			<classpath refid="cobertura.lib" />
+			<!--
+				The following line causes instrument to ignore any
+				source line containing a reference to log4j, for the
+				purposes of coverage reporting.
+			-->
+			<ignore regex="org.apache.log4j.*" />
+
+			<fileset dir="${cobertura.origin.dir}">
+				<!--
+					Instrument all the application classes, but
+					don't instrument the test classes.
+				-->
+				<include name="**/*.class" />
+				<exclude name="**/*Test.class" />
+			</fileset>
+		</cobertura-instrument>
+	</target>
+
+	<target name="test" depends="instrument">
+		<mkdir dir="${report.home}/junit"/>
+		<junit fork="yes" dir="${basedir}" failureProperty="test.failed">
+			<!--
+				Note the classpath order: instrumented classes are before the
+				original (uninstrumented) classes.  This is important.
+			-->
+			<classpath location="${cobertura.instr.dir}" />
+			<classpath location="${cobertura.origin.dir}" />
+
+			<!--
+				The instrumented classes reference classes used by the
+				Cobertura runtime, so Cobertura and its dependencies
+				must be on your classpath.
+			-->
+			<classpath refid="cobertura.lib" />
+
+			<classpath>
+				<pathelement location="${test.build.home}"/>
+				<pathelement location="D:\programs\library\junit4.8.1\junit.jar"/>
+			</classpath>
+			<formatter type="xml" />
+			<batchtest todir="${report.home}/junit" unless="testcase">
+				<fileset dir="${test.build.home}" includes="**/*Test.class">
+				</fileset>
+			</batchtest>
+		</junit>
+
+		<junitreport todir="${report.home}/junit">
+			<fileset dir="${test.build.home}/junit">
+				<include name="TEST-*.xml" />
+			</fileset>
+			<report format="frames" todir="${report.home}/junit" />
+		</junitreport>
+	</target>
+
+	<target name="coverage-check">
+		<cobertura-check branchrate="34" totallinerate="100" />
+	</target>
+
+	<target name="coverage-report">
+		<!--
+			Generate an XML file containing the coverage data using
+			the "srcdir" attribute.
+		-->
+		<cobertura-report srcdir="${cobertura.src.dir}" destdir="${cobertura.coverage.dir}" format="xml" />
+	</target>
+
+	<target name="summary-coverage-report">
+		<!--
+			Generate an summary XML file containing the coverage data using
+			the "srcdir" attribute.
+		-->
+		<cobertura-report srcdir="${cobertura.src.dir}" destdir="${cobertura.coverage.dir}" format="summaryXml" />
+	</target>
+
+	<target name="alternate-coverage-report">
+		<!--
+			Generate a series of HTML files containing the coverage
+			data in a user-readable form using nested source filesets.
+		-->
+		<cobertura-report destdir="${cobertura.coverage.dir}">
+			<fileset dir="${cobertura.src.dir}">
+				<include name="**/*.java"/>
+			</fileset>
+		</cobertura-report>
+	</target>
+
+	<target name="coverage" depends="instrument,test,coverage-report,summary-coverage-report,alternate-coverage-report" description="Compile, instrument ourself, run the tests and generate JUnit and coverage reports."/>
+
+</project>

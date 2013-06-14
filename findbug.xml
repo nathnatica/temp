@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project name="findbug" default="findbug" basedir="C:\jenkins\jobs\wedding\workspace">
+
+	<property name="findbug.lib.dir" value="D:\programs\library" />
+	<property name="findbug.src.dir" value="${basedir}/src/main/java" />
+	<property name="report.home" value="${basedir}/target/report" />
+
+	<path id="findbug.lib">
+		<fileset dir="${findbug.lib.dir}">
+			<include name="findbugs.jar" />
+			<include name="bcel.jar" />
+			<include name="dom4j-1.6.1.jar" />
+			<include name="jFormatString.jar" />
+			<include name="asm-tree-3.1.jar" />
+			<include name="asm-3.1.jar" />
+			<include name="jsr305.jar" />
+			<include name="asm-commons-3.1.jar" />
+		</fileset>
+	</path>
+
+	<taskdef name="findbugs" classname="edu.umd.cs.findbugs.anttask.FindBugsTask" classpathref="findbug.lib" />
+
+	<target name="findbug">
+		<mkdir dir="${report.home}/findbug" />
+
+		<findbugs home="${findbug.lib.dir}" output="xml" outputfile="findbugs.xml" reportlevel="experimental" >
+			<sourcepath path="${findbug.src.dir}"/>
+			<class location="${findbug.lib.dir}/bcel.jar" />
+		</findbugs>
+	</target>
+
+</project>

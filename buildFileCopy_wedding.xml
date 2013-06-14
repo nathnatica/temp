@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+
+<project default="copy" basedir="C:\jenkins\jobs\wedding\workspace">
+
+<echo message="pulling in property files"/>
+
+<!--
+<property file="axis_bujava.properties"/>
+-->
+
+<property name="dest" value="C:\workspace"/>
+
+<echo message="calling the web services generation ant task: axis_bujava"/>
+  <target name="copy" >
+ 	<copy todir="${dest}">
+ 		<fileset dir="${basedir}/target/test-classes/ant"></fileset>
+ 	</copy>
+  </target>
+
+</project>
